@@ -1,18 +1,16 @@
 module counter(
-  input wire clk,
+  input wire dclk,
   input wire reset,
-  input wire en
+  output reg [1:0] counter
 );
   
-  reg [1:0] counter;
-  
-  always@(posedge clk) begin
+  always@(posedge dclk) begin
     if (reset) begin
     counter <= 2'b0;
     end
     
-    if (en) begin
-    counter <= counter + 1;
+    else begin
+      counter <= counter + 1;
     end
-    
-    endmodule
+  end
+endmodule
