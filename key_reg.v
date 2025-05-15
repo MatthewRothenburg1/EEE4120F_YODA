@@ -1,34 +1,55 @@
 module key_reg (
   input wire [7:0] din,
-  input wire clk,
+
   input wire reset,
-  input wire en,
-  input reg [1:0] in_sel,
-  input reg [1:0] out_sel
+  input wire dclk,
+  input wire kset,
+  
+  input wire [1:0] sl,
+  
+  output reg [7:0] dout
 );
-  
+  rese
   reg [31:0] keys;
-  
-  always@(posedge clk) begin 
+  counter c0(.dclk(dclk), .reset(reset), .counter(sl));
+
+  always@(posedge dclk) begin 
     if (reset) begin
       keys <= 32'b0;
     end
-    
-    if (en) begin
-      if (in_sel ==0) begin
+    //Store into register 
+    if (kset == 0) begin
+      if (sl ==0) begin
         keys[7:0] <= din
       end
       
-      if (in_sel ==1) begin
+      if (sl ==1) begin
         keys[15:8] <= din
       end
       
-      if (in_sel ==2) begin
+      if (sl ==2) begin
         keys[23:16] <= din
       end
       
-      if (in_sel ==3) begin
+      if (sl ==3) begin
         keys[31:24] <= din
       end
-      
-      
+  end
+  //Output the key 
+  else begin
+    if (sl ==0) begin
+      dout <= keys[7:0];
+    end  
+    if (sl ==1) begin
+      dout <= keys[15:8];
+    end
+    if (sl ==2) begin
+      dout <= keys[23:16];
+    end
+    
+    if (sl ==3) begin
+      dout <= keys[31:24];
+    end
+  end
+end
+endmodule
