@@ -1,4 +1,3 @@
-`timescale 1ns/1ps
 
 module key_reg_tb;
 
@@ -24,7 +23,7 @@ module key_reg_tb;
 
   initial begin
     // Initial values
-    $monitor("Time=%0t | num_keys=%b (%0d) | keys=0x%08b", $time, num_keys, num_keys, keys);
+    $monitor("Time=%0t | num_keys=%b (%0d) | keys=0x%08b", $time, num_keys, keys);
     dclk = 0;
     reset = 0;
     kset = 0;
@@ -39,6 +38,7 @@ module key_reg_tb;
 
 
     reset = 0;  // Deassert reset
+    kset = 1;   //Set kset to latch the key
     din = 8'b10;
 
     //write the first key
@@ -63,13 +63,12 @@ module key_reg_tb;
     #10 dclk = 0;
     #10 dclk = 1;
 
+    kset = 0;  //Deassert the key set line 
+
+    #10 dclk = 0;
+    #10 dclk = 1;
+
     kset = 1;  // Set kset to latch the key
-
-
-    #10 dclk = 0;
-    #10 dclk = 1;
-
-    kset = 0;  // Set kset to latch the key
     din = 8'b111110;
     
     #10 dclk = 0;
@@ -85,8 +84,6 @@ module key_reg_tb;
     
     #10 dclk = 0;
     #10 dclk = 1;
-
-
 
     $stop;
   end

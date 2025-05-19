@@ -1,30 +1,46 @@
+
 module DEA(
-  input wire clk,
   input wire reset,
-  input wire kset,
   input wire dclk,
+  input wire kset,
   input wire [7:0] din,
-  input reg [3:0] counter,
-   reg [31:0] key;
+
+  input wire [2:0]num_keys,
+
+  input wire [31:0] keys,
+
   output reg [7:0] dout
-  
 );
   
-  
-  always @(posedge clk) being
+  // Internal register to store the current key number
+  reg [2:0] current_key;
+
+  //Initialise the key register and the wire the signals
+  key_reg k (.reset(reset), .dclk(dclk), .kset(kset), .din(din), .num_keys(num_keys),
+  .keys(keys));
+
+  always @(posedge dclk) begin
+     //Reset current key
     if (reset) begin
-      key  <= 8'b0;  //Reset key
       dout <= 8'b0;  //Reset output
-      
+      current_key <= 3'b0;    
     end
-    
-    else begin
-      if (kset)
-        key <= din;   //Latch key when kset is high
-      
-      if (dclk)
-        dout <= din ^ key; //XOR encryption of data clock
-      
+
+    else if(!kset && num_keys!= 0) begin
+      case(current_key)
+        3'b00: dout <= keys[7:0] ^ din;       // 1 key
+        3'b01: dout <= keys[15:8] ^ din;      // 2 keys
+        3'b10: dout <= keys[23:16] ^ din;     // 3 keys
+        3'b11: dout <= keys[31:24] ^ din;     // 4 keys
+        default: dout <= 8'b0;
+      endcase
+      if(current_key == num_keys - 1) begin
+        current_key <= 3'b0; // Reset to first key after using all keys
+      end
+      else begin
+        current_key <= current_key + 1; // Move to the next key
+      end
+
     end
   end
 endmodule

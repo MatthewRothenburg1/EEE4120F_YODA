@@ -1,5 +1,6 @@
 module counter(
   input wire dclk,
+  input wire kset,
   input wire reset,
   output reg [1:0] counter
 );
@@ -9,7 +10,7 @@ module counter(
     counter <= 2'b0;
     end
     
-    else begin
+    else if (!kset)
       counter <= counter + 1;
     end
   end
