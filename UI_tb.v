@@ -89,9 +89,18 @@ module UI_tb;
         end
 
         // Display the encrypted message
-        for (i = 0; i < message_length; i = i + 1) begin
-            $display("%h", encrypted_message[i]);
+        file = $fopen("output.txt", "w"); // "w" = write mode, "a" = append mode
+
+        if (file == 0) begin
+          $display("Failed to open file");
+          $finish;
         end
+
+        for (i = 0; i < message_length; i = i + 1) begin
+            $fwrite(file, "%c",encrypted_message[i]);
+            
+        end
+        $fclose(file);
       $finish;
     end
 

@@ -1,21 +1,20 @@
 
 module DEA(
-  input wire reset,
-  input wire dclk,
-  input wire kset,
-  input wire [7:0] din,
+  input wire reset,     // Reset signal
+  input wire dclk,      // Clock signal
+  input wire kset,      // Key set signal
+  input wire [7:0] din, // Input data 
+  output reg [7:0] dout // Output data
 
-  input wire [2:0]num_keys,
-
-  input wire [31:0] keys,
-
-  output reg [7:0] dout
 );
   
   // Internal register to store the current key number
   reg [2:0] current_key;
+  // Wires to connect to the key register sub-module
+  wire [3:0]num_keys;
+  wire [31:0] keys;
 
-  //Initialise the key register and the wire the signals
+  //Initialise the key register sub-module and the wire the signals
   key_reg k (.reset(reset), .dclk(dclk), .kset(kset), .din(din), .num_keys(num_keys),
   .keys(keys));
 
@@ -23,7 +22,7 @@ module DEA(
      //Reset current key
     if (reset) begin
       dout <= 8'b0;  //Reset output
-      current_key <= 3'b0;    
+      current_key <= 2'b0;    
     end
 
     else if(!kset && num_keys!= 0) begin

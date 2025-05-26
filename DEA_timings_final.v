@@ -1,5 +1,5 @@
 
-`timescale 1ns/1ps  // Explicitly define time units (1ns) and precision (1ps)
+`timescale 1ps/1ps  // Explicitly define time units (1ns) and precision (1ps)
 
 module UI_tb;
     // Registers to hold the key and message
@@ -21,13 +21,13 @@ module UI_tb;
     reg kset;
 
     // Timing measurement
-    integer start_time, end_time;
-    integer load_time, encrypt_time, write_time;
-    integer load_cycles, encrypt_cycles, write_cycles;
+    time start_time, end_time;
+    time load_time, encrypt_time, write_time;
+    time load_cycles, encrypt_cycles, write_cycles;
     
     // Clock parameters
-    parameter CLK_PERIOD = 2;  // 2ns clock period
-    parameter HALF_PERIOD = 1;  // 1ns half-period
+    parameter CLK_PERIOD = 3000;  // 2ns clock period
+    parameter HALF_PERIOD = 1500;  // 1ns half-period
 
     // Instantiate the DEA module
     DEA dut (
@@ -39,14 +39,19 @@ module UI_tb;
     );
     
     initial begin
+
+        $dumpfile("wave.vcd");    // Name of the output VCD file
+        $dumpvars(0, dut);  // Replace 'testbench' with your top module name
+
         // Initialize clock
         dclk = 0;
         
         // =============================================
         // Phase 1: File Loading (Non-clock-synchronous)
         // =============================================
-        start_time = $time;
         
+        start_time = $realtime;
+        #0;
         file = $fopen("test_input.txt", "r");
         if (file == 0) begin
             $display("Failed to open file");
@@ -54,26 +59,27 @@ module UI_tb;
         end 
         
         // Read key
-        key_length = 0;
+        key_length = 4;
         
         key[0] = 8'hAA;
-        key[1] = 8'hAA;
-        key[2] = 8'hAA;
-        key[3] = 8'hAA;
+        key[1] = 8'hBB;
+        key[2] = 8'hCC;
+        key[3] = 8'hDD;
 
         // Read message
         message_length = 0;
-        while (message_length <100000)begin
+        while (message_length <10_000_000_000)begin
              c = $fgetc(file);
             message[message_length] = c[7:0];
             message_length = message_length + 1;
             c = $fgetc(file);
-            $display(message_length);
+            //$display(message_length);
     end
         
         $fclose(file);
-        end_time = $time;
+        end_time = $realtime;
         load_time = end_time - start_time;
+        $display(load_time);
         load_cycles = load_time / CLK_PERIOD;
         $display("[LOAD] Completed in %0d ns (%0d clock cycles)", load_time, load_cycles);
         
@@ -115,10 +121,10 @@ module UI_tb;
         // =============================================
         start_time = $time;
         
-        for (i = 0; i < message_length; i = i + 1) begin
-            $display("%h", encrypted_message[i]);
-        end
-        
+        //for (i = 0; i < message_length; i = i + 1) begin
+        //    $display("%h", encrypted_message[i]);
+        //end
+        $display("%h", encrypted_message[3]);
         end_time = $time;
         write_time = end_time - start_time;
         write_cycles = write_time / CLK_PERIOD;
@@ -140,4 +146,11 @@ module UI_tb;
         
         $finish;
     end
+
+    //initial begin
+    //    $monitor("Time: %t | kset=%b keys=%h din=%h dout=%h current_key=%h reset=%h dclk=%h",
+    //         $time, kset, dut.k.keys, din, dout, dut.current_key, reset, dclk);
+    //end
+
+
 endmodule
